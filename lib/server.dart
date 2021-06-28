@@ -19,18 +19,22 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class Plant {
+  final int? id;
   final String type;
   final int humidity;
   final int temperature;
   final int ph;
   final int ec;
 
-  Plant({required this.type, required this.humidity, required this.temperature, required this.ph, required this.ec});
+  Plant({this.id, required this.type, required this.humidity, required this.temperature, required this.ph, required this.ec});
 }
 
 class Server {
   final _host = 'urban-farming-demo.herokuapp.com';
   final _port = '80';
+  final userID;
+
+  Server(this.userID);
 
   List<Function> _cbs = [];
 
@@ -38,6 +42,58 @@ class Server {
 
   void addCB(Function cb) {
     _cbs.add(cb);
+  }
+
+  Future<dynamic> _get(String path) async {
+    Uri uri = _buildUri("${this.userID}/$path");
+    var response = await http.get(uri);
+
+    if (response.statusCode == 200)
+      return jsonDecode(response.body);
+  }
+
+  void _callCB(dynamic retVal) {
+    _cbs.forEach((cb) {
+      cb(retVal);
+    });
+  }
+
+  Future<List<Plant>> getPlants() async {
+    dynamic respJson = await _get("");
+    List<Plant> retList = [];
+
+    if (respJson == null)
+      return retList;
+
+    respJson["plants"].forEach((plant) {
+      retList.add(Plant(
+        id: plant["plantID"],
+        type: plant["plantType"],
+        humidity: plant["humidity"],
+        temperature: plant["temperature"],
+        ph: plant["pH"],
+        ec: plant["E"]
+      ));
+    });
+
+    _callCB(retList);
+    return retList;
+  }
+
+  Future<Plant?> getPlant(int id) async {
+    dynamic respJson = await _get(id.toString());
+
+    if (respJson == null)
+      return null;
+    else 
+      return Plant(
+        id: respJson["plant"]["plantID"],
+        type: respJson["plant"]["plantType"],
+        humidity: respJson["plant"]["humidity"],
+        temperature: respJson["plant"]["temperature"],
+        ph: respJson["plant"]["pH"],
+        ec: respJson["plant"]["E"]
+      );
   }
 
   Future<String> update() async {
@@ -50,13 +106,15 @@ class Server {
 
       List<Plant> cbRet = [];
       var responseJson = jsonDecode(response.body);
-      responseJson.forEach((obj) {
+      // responseJson["plants"].forEach((plant) {
+      responseJson.forEach((plant) {
         Plant newPlant = Plant(
-          type: obj["plantType"],
-          humidity: obj["humidity"],
-          temperature: obj["temperature"],
-          ph: obj["pH"],
-          ec: obj["EC"]
+          // id: plant["id"],
+          type: plant["plantType"],
+          humidity: plant["humidity"],
+          temperature: plant["temperature"],
+          ph: plant["pH"],
+          ec: plant["EC"]
         );
 
         cbRet.add(newPlant);

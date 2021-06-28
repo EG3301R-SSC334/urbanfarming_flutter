@@ -21,7 +21,7 @@ import 'server.dart';
 
 class _HomePageState extends State {
 	List<Plant> plants = [];
-	Server server = Server();
+	Server server = Server(0);
 
 	void _cb(List<Plant> newList) {
 		plants = newList;
@@ -44,16 +44,6 @@ class _HomePageState extends State {
 				subtitle: Text(plants[index].temperature.toString()),
 			)
 		);
-		// return Column(
-		// 	children: [
-		// 		Text("testing 1"),
-		// 		Text("testing 2"),
-		// 		ElevatedButton(
-		// 			onPressed: () => server.update(),
-		// 			child: Text("CLICK ME"),
-		// 		)
-		// 	],
-		// );
 	}
 }
 
