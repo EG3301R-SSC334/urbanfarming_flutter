@@ -18,6 +18,7 @@
 import 'package:flutter/material.dart';
 
 import 'server.dart';
+import 'graphs.dart';
 
 class _HomePageState extends State {
 	List<Plant> plants = [];
@@ -31,19 +32,50 @@ class _HomePageState extends State {
 	@override
 	Widget build(BuildContext context) {
 		server.addCB(_cb);
-		return ListView.builder(
-			itemCount: plants.length + 1,
-			itemBuilder: (context, index) =>
-			(index == plants.length) ? 
-			ElevatedButton(
-				child: Text("Click Me"),
-				onPressed: () => server.update(),
-			) :
-			ListTile(
-				title: Text(plants[index].type),
-				subtitle: Text(plants[index].temperature.toString()),
-			)
+		// return ListView.builder(
+		// 	itemCount: plants.length + 1,
+		// 	itemBuilder: (context, index) =>
+		// 	(index == plants.length) ? 
+		// 	ElevatedButton(
+		// 		child: Text("Click Me"),
+		// 		onPressed: () => server.update(),
+		// 	) :
+		// 	ListTile(
+		// 		title: Text(plants[index].type),
+		// 		subtitle: Text(plants[index].temperature.toString()),
+		// 	),
+		// );
+		return Column(
+			mainAxisSize: MainAxisSize.min,
+			children: [
+				Container(
+					child: TestGraph.withData(),
+					height: 200,
+				),
+				Container(
+					child: TestGraph.withData(),
+					height: 300,
+				)
+			],
 		);
+
+		// return ListView.builder(
+		// 	itemCount: plants.length + 2,
+		// 	itemBuilder: (context, index) {
+		// 		if (index == plants.length) {
+		// 			return ElevatedButton(
+		// 				child: Text("Click Me"),
+		// 				onPressed: () => server.update(),
+		// 			);
+		// 		} else if (index == plants.length + 1) {
+		// 		} else {
+		// 			return ListTile(
+		// 				title: Text(plants[index].type),
+		// 				subtitle: Text(plants[index].temperature.toString()),
+		// 			);
+		// 		}
+		// 	}
+		// );
 	}
 }
 
