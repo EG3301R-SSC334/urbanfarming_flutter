@@ -16,35 +16,58 @@
 // along with urbanfarming_flutter.  If not, see <https://www.gnu.org/licenses/>.
 
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 import 'server.dart';
 import 'graphs.dart';
 
+GoogleSignIn _googleSignIn = GoogleSignIn(
+	clientId: "",
+	scopes: [
+    'https://www.googleapis.com/auth/userinfo.email'
+	]
+);
+
 class _HomePageState extends State {
 	List<Plant> plants = [];
 	Server server = Server(0);
+
+	GoogleSignInAccount? _currentUser;
+	
+	@override
+	void initState() {
+		super.initState();
+		_googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount? account) {
+			setState(() {
+				print("\n\n\nsetting state\n\n");
+				_currentUser = account;
+        print(_currentUser);
+			});
+			if (_currentUser != null) {
+				print("\n\n\nGot account\n\n");
+			}
+		});
+		_googleSignIn.signInSilently();
+	}
 
 	void _cb(List<Plant> newList) {
 		plants = newList;
 		setState(() {print("SET STATE");});
 	}
 
+	Future<void> _handleSignIn() async {
+		try {
+			await _googleSignIn.signIn();
+		} catch (error) {
+			print("\n\n Failed to sign in\n\n");
+			print(error);
+		}
+	}
+
 	@override
 	Widget build(BuildContext context) {
 		server.addCB(_cb);
-		// return ListView.builder(
-		// 	itemCount: plants.length + 1,
-		// 	itemBuilder: (context, index) =>
-		// 	(index == plants.length) ? 
-		// 	ElevatedButton(
-		// 		child: Text("Click Me"),
-		// 		onPressed: () => server.update(),
-		// 	) :
-		// 	ListTile(
-		// 		title: Text(plants[index].type),
-		// 		subtitle: Text(plants[index].temperature.toString()),
-		// 	),
-		// );
+		GoogleSignInAccount? user = _currentUser;
 		return Column(
 			mainAxisSize: MainAxisSize.min,
 			children: [
@@ -55,27 +78,21 @@ class _HomePageState extends State {
 				Container(
 					child: TestGraph.withData(),
 					height: 300,
+				),
+				(user != null) ?
+				Text('${user.email} ${user.displayName} ${user.id}') :
+				Text('Not logged in yet'),
+				ElevatedButton(
+					child: Text("Log in"),
+					// onPressed: () => _googleSignIn.signIn(),
+					onPressed: () => _handleSignIn(),
+				),
+				ElevatedButton(
+					child: Text("Log out"),
+					onPressed: () => _googleSignIn.disconnect()
 				)
 			],
 		);
-
-		// return ListView.builder(
-		// 	itemCount: plants.length + 2,
-		// 	itemBuilder: (context, index) {
-		// 		if (index == plants.length) {
-		// 			return ElevatedButton(
-		// 				child: Text("Click Me"),
-		// 				onPressed: () => server.update(),
-		// 			);
-		// 		} else if (index == plants.length + 1) {
-		// 		} else {
-		// 			return ListTile(
-		// 				title: Text(plants[index].type),
-		// 				subtitle: Text(plants[index].temperature.toString()),
-		// 			);
-		// 		}
-		// 	}
-		// );
 	}
 }
 

@@ -29,6 +29,8 @@ dependencies:
       url: https://github.com/robhoefakker/charts.git
       path: charts_flutter
   # charts_flutter: ^0.10.0
+  google_sign_in: ^5.0.5
+  # firebase_auth: ^0.16.0
 
 
   # The following adds the Cupertino Icons font to your application.
