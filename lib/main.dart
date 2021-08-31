@@ -23,13 +23,6 @@ import 'server.dart';
 import 'graphs.dart';
 import 'auth.dart';
 
-GoogleSignIn _googleSignIn = GoogleSignIn(
-	clientId: "46868439888-v405ntt411j634238ih9qptopb9svdjf.apps.googleusercontent.com",
-	scopes: [
-		'https://www.googleapis.com/auth/userinfo.email'
-	]
-);
-
 class _HomePageState extends State {
 	Auth auth = Auth();
 	List<Plant> plants = [];
@@ -45,14 +38,6 @@ class _HomePageState extends State {
 	void _cb(List<Plant> newList) {
 		plants = newList;
 		setState(() {print("SET STATE");});
-	}
-
-	Future<void> _handleSignIn() async {
-		try {
-			await _googleSignIn.signIn();
-		} catch (error) {
-			print(error);
-		}
 	}
 
 	void postBuild() {
