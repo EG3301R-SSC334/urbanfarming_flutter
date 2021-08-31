@@ -17,37 +17,29 @@
 
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:urbanfarming_flutter/login_page.dart';
 
 import 'server.dart';
 import 'graphs.dart';
+import 'auth.dart';
 
 GoogleSignIn _googleSignIn = GoogleSignIn(
-	clientId: "",
+	clientId: "46868439888-v405ntt411j634238ih9qptopb9svdjf.apps.googleusercontent.com",
 	scopes: [
-    'https://www.googleapis.com/auth/userinfo.email'
+		'https://www.googleapis.com/auth/userinfo.email'
 	]
 );
 
 class _HomePageState extends State {
+	Auth auth = Auth();
 	List<Plant> plants = [];
 	Server server = Server(0);
 
-	GoogleSignInAccount? _currentUser;
-	
 	@override
 	void initState() {
 		super.initState();
-		_googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount? account) {
-			setState(() {
-				print("\n\n\nsetting state\n\n");
-				_currentUser = account;
-        print(_currentUser);
-			});
-			if (_currentUser != null) {
-				print("\n\n\nGot account\n\n");
-			}
-		});
-		_googleSignIn.signInSilently();
+		auth.addCB(authCB);
+		WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {postBuild();});
 	}
 
 	void _cb(List<Plant> newList) {
@@ -59,15 +51,29 @@ class _HomePageState extends State {
 		try {
 			await _googleSignIn.signIn();
 		} catch (error) {
-			print("\n\n Failed to sign in\n\n");
 			print(error);
 		}
+	}
+
+	void postBuild() {
+		print("SIGNIN STATUS: ${auth.isSignedIn()}");
+		if (!auth.isSignedIn()) {
+			Navigator.push(context, MaterialPageRoute(builder: (context) => LogInPage()));
+		}
+	}
+
+	void authCB() {
+		print("Main Page Auth CB Called");
+		setState(() {
+		  print(auth.getUser().toString());
+		});
 	}
 
 	@override
 	Widget build(BuildContext context) {
 		server.addCB(_cb);
-		GoogleSignInAccount? user = _currentUser;
+
+		GoogleSignInAccount? user = auth.getUser();
 		return Column(
 			mainAxisSize: MainAxisSize.min,
 			children: [
@@ -75,21 +81,33 @@ class _HomePageState extends State {
 					child: TestGraph.withData(),
 					height: 200,
 				),
-				Container(
-					child: TestGraph.withData(),
-					height: 300,
-				),
+				// Container(
+				// 	child: TestGraph.withData(),
+				// 	height: 300,
+				// ),
+				Text(auth.getUser().toString()),
 				(user != null) ?
-				Text('${user.email} ${user.displayName} ${user.id}') :
+				Text('${user.email} ${user.displayName} ${user.id} ${auth.toString()}') :
 				Text('Not logged in yet'),
 				ElevatedButton(
 					child: Text("Log in"),
-					// onPressed: () => _googleSignIn.signIn(),
-					onPressed: () => _handleSignIn(),
+					onPressed: () => auth.signIn(),
 				),
 				ElevatedButton(
 					child: Text("Log out"),
-					onPressed: () => _googleSignIn.disconnect()
+					onPressed: () => auth.signOut(),
+				),
+				ElevatedButton(
+					child: Text("Sign in page"),
+					onPressed: () => Navigator.push(context, MaterialPageRoute(
+						builder: (context) {
+							return LogInPage();
+						}
+					))
+				),
+				ElevatedButton(
+					child: Text("set state"),
+					onPressed: () => setState(() {})
 				)
 			],
 		);
@@ -109,7 +127,7 @@ class UrbanFarmingApp extends StatelessWidget {
 			appBar: AppBar(
 				title: Text("Urban Farming")
 			),
-			body: HomePage(),
+			body: HomePage()
 		)
 	);
 }
