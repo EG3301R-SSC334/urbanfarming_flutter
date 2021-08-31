@@ -19,46 +19,46 @@ import 'package:flutter/material.dart';
 import 'package:charts_flutter/flutter.dart';
 
 class TestGraph extends StatelessWidget {
-  final List<Series<dynamic, DateTime>> seriesList;
-  final bool animate;
+	final List<Series<dynamic, DateTime>> seriesList;
+	final bool animate;
 
-  TestGraph(this.seriesList, this.animate);
+	TestGraph(this.seriesList, this.animate);
 
-  factory TestGraph.withData() {
-    return TestGraph(_createData(), true);
-  }
+	factory TestGraph.withData() {
+		return TestGraph(_createData(), true);
+	}
 
-  @override
-  Widget build(BuildContext context) {
-    return TimeSeriesChart(
-      seriesList,
-      animate: animate,
-    );
-  }
+	@override
+	Widget build(BuildContext context) {
+		return TimeSeriesChart(
+			seriesList,
+			animate: animate,
+		);
+	}
 
-  static List<Series<TestData, DateTime>> _createData() {
-    final data = [
-      TestData(DateTime(2021, 7, 1), 25),
-      TestData(DateTime(2021, 7, 2), 23),
-      TestData(DateTime(2021, 7, 3), 30),
-      TestData(DateTime(2021, 7, 4), 20),
-      TestData(DateTime(2021, 7, 6), 15),
-      TestData(DateTime(2021, 7, 7), 4),
-      TestData(DateTime(2021, 7, 8), 65),
-    ];
+	static List<Series<TestData, DateTime>> _createData() {
+		final data = [
+			TestData(DateTime(2021, 7, 1), 25),
+			TestData(DateTime(2021, 7, 2), 23),
+			TestData(DateTime(2021, 7, 3), 30),
+			TestData(DateTime(2021, 7, 4), 20),
+			TestData(DateTime(2021, 7, 6), 15),
+			TestData(DateTime(2021, 7, 7), 4),
+			TestData(DateTime(2021, 7, 8), 65),
+		];
 
-    return [Series<TestData, DateTime>(
-      id: 'Test',
-      domainFn: (TestData data, _) => data.time,
-      measureFn: (TestData data, _) => data.data,
-      data: data
-    )];
-  }
+		return [Series<TestData, DateTime>(
+			id: 'Test',
+			domainFn: (TestData data, _) => data.time,
+			measureFn: (TestData data, _) => data.data,
+			data: data
+		)];
+	}
 }
 
 class TestData {
-  final DateTime time;
-  final int data;
+	final DateTime time;
+	final int data;
 
-  TestData(this.time, this.data);
+	TestData(this.time, this.data);
 }
