@@ -25,7 +25,6 @@ class LogInPageState extends State {
 	void authCB() {
 		print("LOGIN Page Auth CB Called");
 		setState(() {
-			_auth.removeCB(authCB);
 			Navigator.pop(context);
 		});
 	}
@@ -34,29 +33,27 @@ class LogInPageState extends State {
 	Widget build(BuildContext context) {
 		_auth.addCB(authCB);
 
-		return Scaffold(
-			appBar: AppBar(
-				title: Text("Log in"),
-			),
-			body: Column(
-				children: [
-					Text("You need to login to use the app mate"),
-					Text((_auth.isSignedIn()) ? "SIGNED IN " : "Not signed in yet"),
-					ElevatedButton(
-						child: Text("Log In"),
-						onPressed: () => _auth.signInSync()
-					),
-					ElevatedButton(
-						child: Text("go back"),
-						onPressed: () => Navigator.pop(context),
-					),
-					ElevatedButton(
-						child: Text("set state"),
-						onPressed: () => setState(() {}),
-					),
-				]
+		return WillPopScope(
+			onWillPop: () async => false,
+			child: Scaffold(
+				appBar: AppBar(
+					title: Text("Log in"),
+					automaticallyImplyLeading: false,
+				),
+				body: Center(
+					child: ElevatedButton(
+						child: Text("Log in with Google"),
+						onPressed: () => _auth.signInSync(),
+					)
+				)
 			)
 		);
+	}
+
+	@override
+	void dispose() {
+		_auth.removeCB(authCB);
+		super.dispose();
 	}
 }
 

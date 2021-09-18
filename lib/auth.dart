@@ -40,42 +40,36 @@ class Auth {
 
 	List<Function> _cbs = [];
 
+	bool authComplete = false;
 	bool loggedIn = false;
 
 	Auth._init() {
-		// Auth() {
-			print("AUTH IS BEING INITED NOW");
-			SharedPreferences.getInstance().then((prefs) {
-				_prefs = prefs;
-				try {
-					loggedIn = _prefs?.getBool("logged_in") ?? false;
-					print("\nLogged In Status: $loggedIn");
-				} catch (error) {
-					print(error);
-					loggedIn = false;
-				}
+		SharedPreferences.getInstance().then((prefs) {
+			_prefs = prefs;
+			try {
+				loggedIn = _prefs?.getBool("logged_in") ?? false;
+				print("\nLogged In Status: $loggedIn");
+			} catch (error) {
+				print(error);
+				loggedIn = false;
 			}
+			authComplete = true;
+		}
 		);
 
 		_googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount? account) {
-			print("sign in happening");
-			print("account: $account");
-			print("_currentUser: $_currentUser");
 			_currentUser = account;
 			_prefs?.setBool("logged_in", true);
 
-			print("_currentUser: $_currentUser");
-
-			print("Calling CBs");
 			_cbs.forEach((element) {
 				element();
 			});
-
-			print("Finished signing in");
 		});
 
 		_googleSignIn.signInSilently();
-		print("_currentUser $_currentUser");
+		// print("_currentUser $_currentUser");
+
+		print("Auth init complete");
 	}
 
 	Future<void> signIn() async {
@@ -107,8 +101,16 @@ class Auth {
 		_prefs?.setBool("logged_in", false);
 	}
 
-	// bool isSignedIn() => (_currentUser != null) ? true : false;
-	bool isSignedIn() => loggedIn;
+	bool isSignedIn() {
+		for (int i = 0; i < 20; i++) {
+			if (authComplete)
+				break;
+			Future.delayed(Duration(microseconds: 3));
+		}
+
+		print("logged In: $loggedIn");
+		return loggedIn;
+	}
 
 	GoogleSignInAccount? getUser() => _currentUser;
 

@@ -41,7 +41,6 @@ class _HomePageState extends State {
 	}
 
 	void postBuild() {
-		print("SIGNIN STATUS: ${auth.isSignedIn()}");
 		if (!auth.isSignedIn()) {
 			Navigator.push(context, MaterialPageRoute(builder: (context) => LogInPage()));
 		}
@@ -93,7 +92,11 @@ class _HomePageState extends State {
 				ElevatedButton(
 					child: Text("set state"),
 					onPressed: () => setState(() {})
-				)
+				),
+				ElevatedButton(
+					child: Text("Sign in status"),
+					onPressed: () => auth.isSignedIn(),
+				),
 			],
 		);
 	}
