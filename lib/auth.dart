@@ -18,6 +18,8 @@
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'server.dart';
+
 class Auth {
 	// Make this a singleton class
 	static final Auth _instance = Auth._init();
@@ -72,14 +74,6 @@ class Auth {
 		print("Auth init complete");
 	}
 
-	Future<void> signIn() async {
-		try {
-			await _googleSignIn.signIn();
-		} catch (error) {
-			print(error);
-		}
-	}
-
 	void addCB(Function cb) {
 		_cbs.add(cb);
 	}
@@ -88,16 +82,69 @@ class Auth {
 		_cbs.remove(cb);
 	}
 
-	void signInSync() {
+	// void signInSync() {
+	// 	try {
+	// 		_googleSignIn.signIn().then((obj) {
+	// 			Server server = Server();
+	// 			String? idToken;
+	// 			String? accessToken;
+
+	// 			if (obj != null) {
+	// 				obj.authentication.then((gauth) async {
+	// 					idToken = gauth.idToken;
+	// 					accessToken = gauth.accessToken;
+
+	// 					Map<String, String> data = {
+	// 						"username": obj.displayName ?? "",
+	// 						"email": obj.email,
+	// 						"id_token": idToken ?? "",
+	// 						"access_token": accessToken ?? ""
+	// 					};
+
+	// 					// print("DATA: $data");
+						
+	// 					Map<String, String> authResp = await server.auth(data);
+
+	// 					_prefs?.setString("bearer", authResp["bearerToken"] ?? "");
+	// 					print('BEARER: ${authResp["bearerToken"] ?? "Not yet"}');
+	// 				});
+	// 			}
+	// 		});
+	// 	} catch (error) {
+	// 		print("ERROR EXPERIENCED: $error");
+	// 	}
+	// }
+
+	Future<void> signIn() async {
+		GoogleSignInAccount? gaccount;
+		GoogleSignInAuthentication? gauth;
+		Server server = Server();
+
 		try {
-			_googleSignIn.signIn().then((_) {});
+			gaccount = await _googleSignIn.signIn();
 		} catch (error) {
-			print("ERROR EXPERIENCED: $error");
+			print("error experienced in login: $error");
 		}
+
+		if (gaccount != null) 
+			gauth = await gaccount.authentication;
+
+		Map<String, String> body = {
+			"username": gaccount?.displayName ?? "",
+			"email": gaccount?.email ?? "",
+			"id_token": gauth?.idToken ?? "",
+			"access_token": gauth?.accessToken ?? ""
+		};
+
+		Map<String, String> authResp = await server.auth(body);
+		print("authResp: $authResp");
+
 	}
 
-	void signOut() {
-		_googleSignIn.disconnect();
+
+
+	Future<void> signOut() async {
+		await _googleSignIn.disconnect();
 		_prefs?.setBool("logged_in", false);
 	}
 
@@ -113,5 +160,18 @@ class Auth {
 	}
 
 	GoogleSignInAccount? getUser() => _currentUser;
+	String getName() => _currentUser?.displayName ?? "";
+	String getEmail() => _currentUser?.email ?? "";
+	String getPhoto() => _currentUser?.photoUrl ?? "";
+
+	String getInitials() {
+		String retStr = "";
+		_currentUser?.displayName?.split(" ").forEach((name) { 
+			retStr += name[0];
+		});
+
+		return retStr;
+	}
+
 
 }
