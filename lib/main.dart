@@ -16,107 +16,14 @@
 // along with urbanfarming_flutter.  If not, see <https://www.gnu.org/licenses/>.
 
 import 'package:flutter/material.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:urbanfarming_flutter/login_page.dart';
 
-import 'server.dart';
-import 'graphs.dart';
-import 'auth.dart';
-
-class _HomePageState extends State {
-	Auth auth = Auth();
-	List<Plant> plants = [];
-	Server server = Server(0);
-
-	@override
-	void initState() {
-		super.initState();
-		auth.addCB(authCB);
-		WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {postBuild();});
-	}
-
-	void _cb(List<Plant> newList) {
-		plants = newList;
-		setState(() {print("SET STATE");});
-	}
-
-	void postBuild() {
-		if (!auth.isSignedIn()) {
-			Navigator.push(context, MaterialPageRoute(builder: (context) => LogInPage()));
-		}
-	}
-
-	void authCB() {
-		print("Main Page Auth CB Called");
-		setState(() {
-		  print(auth.getUser().toString());
-		});
-	}
-
-	@override
-	Widget build(BuildContext context) {
-		server.addCB(_cb);
-
-		GoogleSignInAccount? user = auth.getUser();
-		return Column(
-			mainAxisSize: MainAxisSize.min,
-			children: [
-				Container(
-					child: TestGraph.withData(),
-					height: 200,
-				),
-				// Container(
-				// 	child: TestGraph.withData(),
-				// 	height: 300,
-				// ),
-				Text(auth.getUser().toString()),
-				(user != null) ?
-				Text('${user.email} ${user.displayName} ${user.id} ${auth.toString()}') :
-				Text('Not logged in yet'),
-				ElevatedButton(
-					child: Text("Log in"),
-					onPressed: () => auth.signIn(),
-				),
-				ElevatedButton(
-					child: Text("Log out"),
-					onPressed: () => auth.signOut(),
-				),
-				ElevatedButton(
-					child: Text("Sign in page"),
-					onPressed: () => Navigator.push(context, MaterialPageRoute(
-						builder: (context) {
-							return LogInPage();
-						}
-					))
-				),
-				ElevatedButton(
-					child: Text("set state"),
-					onPressed: () => setState(() {})
-				),
-				ElevatedButton(
-					child: Text("Sign in status"),
-					onPressed: () => auth.isSignedIn(),
-				),
-			],
-		);
-	}
-}
-
-class HomePage extends StatefulWidget {
-	@override
-	_HomePageState createState() => _HomePageState();
-}
+import 'home_page.dart';
 
 class UrbanFarmingApp extends StatelessWidget {
 	@override
 	Widget build(BuildContext context) => MaterialApp(
 		title: "Urban Farming",
-		home: Scaffold(
-			appBar: AppBar(
-				title: Text("Urban Farming")
-			),
-			body: HomePage()
-		)
+		home: HomePage()
 	);
 }
 
