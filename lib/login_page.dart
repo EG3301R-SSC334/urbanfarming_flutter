@@ -17,6 +17,8 @@
 
 import 'package:flutter/material.dart';
 
+import 'home_page.dart';
+
 import 'auth.dart';
 
 Auth _auth = Auth();
@@ -26,12 +28,19 @@ class LogInPageState extends State {
 		print("LOGIN Page Auth CB Called");
 		setState(() {
 			Navigator.pop(context);
+			Navigator.popUntil(context, (route) => !route.hasActiveRouteBelow);
 		});
 	}
 
 	@override
-	Widget build(BuildContext context) {
+	void initState() {
+		super.initState();
 		_auth.addCB(authCB);
+	}
+
+	@override
+	Widget build(BuildContext context) {
+		// _auth.addCB(authCB);
 
 		return WillPopScope(
 			onWillPop: () async => false,
@@ -43,7 +52,7 @@ class LogInPageState extends State {
 				body: Center(
 					child: ElevatedButton(
 						child: Text("Log in with Google"),
-						onPressed: () => _auth.signInSync(),
+						onPressed: () => _auth.signIn(),
 					)
 				)
 			)
