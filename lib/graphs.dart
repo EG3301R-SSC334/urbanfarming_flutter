@@ -18,73 +18,9 @@
 import 'package:flutter/material.dart';
 import 'package:charts_flutter/flutter.dart' hide TextStyle;
 
-class TestGraph extends StatelessWidget {
-	final List<Series<dynamic, DateTime>> seriesList;
-	final bool animate;
-
-	TestGraph(this.seriesList, this.animate);
-
-	factory TestGraph.withData() {
-		return TestGraph(_createData(), true);
-	}
-
-	@override
-	Widget build(BuildContext context) {
-		return TimeSeriesChart(
-			seriesList,
-			animate: animate,
-		);
-	}
-
-	static List<Series<TestData, DateTime>> _createData() {
-		final data = [
-			TestData(DateTime(2021, 7, 1), 25),
-			TestData(DateTime(2021, 7, 2), 23),
-			TestData(DateTime(2021, 7, 3), 30),
-			TestData(DateTime(2021, 7, 4), 20),
-			TestData(DateTime(2021, 7, 6), 15),
-			TestData(DateTime(2021, 7, 7), 4),
-			TestData(DateTime(2021, 7, 8), 65),
-		];
-
-		return [Series<TestData, DateTime>(
-			id: 'Test',
-			domainFn: (TestData data, _) => data.time,
-			measureFn: (TestData data, _) => data.data,
-			data: data
-		)];
-	}
-
-	static List<Series<TestData, DateTime>> createData() {
-		final data = [
-			TestData(DateTime(2021, 7, 1), 25),
-			TestData(DateTime(2021, 7, 2), 23),
-			TestData(DateTime(2021, 7, 3), 30),
-			TestData(DateTime(2021, 7, 4), 20),
-			TestData(DateTime(2021, 7, 6), 15),
-			TestData(DateTime(2021, 7, 7), 4),
-			TestData(DateTime(2021, 7, 8), 65),
-		];
-
-		return [Series<TestData, DateTime>(
-			id: 'Test',
-			domainFn: (TestData data, _) => data.time,
-			measureFn: (TestData data, _) => data.data,
-			data: data
-		)];
-	}
-}
-
-class TestData {
-	final DateTime time;
-	final int data;
-
-	TestData(this.time, this.data);
-}
-
 class Graph extends StatelessWidget {
 	final String title;
-	final List<Series<dynamic, DateTime>> data;
+	final List<DataPoint> data;
 	final bool animate;
 
 	Graph({required this.title, required this.data, this.animate = false});
@@ -99,7 +35,12 @@ class Graph extends StatelessWidget {
 					Container(
 						height: 200,
 						child: TimeSeriesChart(
-							data,
+							[Series(
+								id: title,
+								data: data,
+								domainFn: (data, _) => data.time,
+								measureFn: (data, _) => data.value
+							)],
 							animate: animate,
 						)
 					)
@@ -110,8 +51,8 @@ class Graph extends StatelessWidget {
 }
 
 class DataPoint {
-	final int data;
+	final int value;
 	final DateTime time;
 
-	DataPoint(this.data, this.time);
+	DataPoint(this.value, this.time);
 }

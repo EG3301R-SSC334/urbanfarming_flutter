@@ -40,9 +40,6 @@ class _HomePageState extends State {
 		plantType: "plant"
 	);
 	
-
-	List<Series<TestData, DateTime>> testgraph = TestGraph.createData();
-
 	@override
 	void initState() {
 		super.initState();
@@ -138,7 +135,7 @@ class _HomePageState extends State {
 						margin: EdgeInsets.all(10),
 						child: Graph(
 							title: "Test",
-								data: testgraph,
+								data: system.temperature
 						)
 					),
 					ElevatedButton(
