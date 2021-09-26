@@ -15,35 +15,19 @@
 // You should have received a copy of the GNU General Public License
 // along with urbanfarming_flutter.  If not, see <https://www.gnu.org/licenses/>.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide DataTable;
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:charts_flutter/flutter.dart' hide TextStyle;
 
 import 'login_page.dart';
 import 'user_page.dart';
+import 'system_page.dart';
+
+import 'data_table.dart';
 
 import 'server.dart';
 import 'graphs.dart';
 import 'auth.dart';
-
-class GridItem extends StatelessWidget {
-	final String heading;
-	final int value;
-
-	GridItem({required this.heading, required this.value});
-
-	@override
-	Widget build(BuildContext context) => Container(
-		height: 75,
-		child: Column(
-			mainAxisAlignment: MainAxisAlignment.center,
-			children: [
-				Text(heading, style: TextStyle(fontWeight: FontWeight.bold)),
-				Text(value.toString())
-			],
-		)
-	);
-}
 
 class _HomePageState extends State {
 	Auth auth = Auth();
@@ -66,36 +50,36 @@ class _HomePageState extends State {
 		WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {postBuild();});
 
 		system.humidity = [
-			DataPoint(1, DateTime.now()),
-			DataPoint(2, DateTime.now()),
-			DataPoint(3, DateTime.now()),
-			DataPoint(4, DateTime.now()),
-			DataPoint(5, DateTime.now()),
-			DataPoint(6, DateTime.now()),
+			DataPoint(1, DateTime(2021, 09, 10)),
+			DataPoint(2, DateTime(2021, 09, 11)),
+			DataPoint(3, DateTime(2021, 09, 12)),
+			DataPoint(4, DateTime(2021, 09, 13)),
+			DataPoint(5, DateTime(2021, 09, 14)),
+			DataPoint(6, DateTime(2021, 09, 15)),
 		];
 		system.temperature = [
-			DataPoint(1, DateTime.now()),
-			DataPoint(2, DateTime.now()),
-			DataPoint(3, DateTime.now()),
-			DataPoint(4, DateTime.now()),
-			DataPoint(5, DateTime.now()),
-			DataPoint(6, DateTime.now()),
+			DataPoint(1, DateTime(2021, 09, 10)),
+			DataPoint(2, DateTime(2021, 09, 11)),
+			DataPoint(3, DateTime(2021, 09, 12)),
+			DataPoint(4, DateTime(2021, 09, 13)),
+			DataPoint(5, DateTime(2021, 09, 14)),
+			DataPoint(6, DateTime(2021, 09, 15)),
 		];
 		system.ph = [
-			DataPoint(1, DateTime.now()),
-			DataPoint(2, DateTime.now()),
-			DataPoint(3, DateTime.now()),
-			DataPoint(4, DateTime.now()),
-			DataPoint(5, DateTime.now()),
-			DataPoint(6, DateTime.now()),
+			DataPoint(1, DateTime(2021, 09, 10)),
+			DataPoint(2, DateTime(2021, 09, 11)),
+			DataPoint(3, DateTime(2021, 09, 12)),
+			DataPoint(4, DateTime(2021, 09, 13)),
+			DataPoint(5, DateTime(2021, 09, 14)),
+			DataPoint(6, DateTime(2021, 09, 15)),
 		];
 		system.ec = [
-			DataPoint(1, DateTime.now()),
-			DataPoint(2, DateTime.now()),
-			DataPoint(3, DateTime.now()),
-			DataPoint(4, DateTime.now()),
-			DataPoint(5, DateTime.now()),
-			DataPoint(6, DateTime.now()),
+			DataPoint(1, DateTime(2021, 09, 10)),
+			DataPoint(2, DateTime(2021, 09, 11)),
+			DataPoint(3, DateTime(2021, 09, 12)),
+			DataPoint(4, DateTime(2021, 09, 13)),
+			DataPoint(5, DateTime(2021, 09, 14)),
+			DataPoint(6, DateTime(2021, 09, 15)),
 		];
 	}
 
@@ -148,40 +132,13 @@ class _HomePageState extends State {
 				mainAxisSize: MainAxisSize.min,
 				children: [
 					Card(
-						child: Table(
-							children: [
-								TableRow(
-									children: [
-										GridItem(
-											heading: "Humidity",
-											value: system.humidity.last.data,
-										),
-										GridItem(
-											heading: "Temperature",
-											value: system.temperature.last.data,
-										),
-									]
-								),
-								TableRow(
-									children: [
-										GridItem(
-											heading: "pH",
-											value: system.ph.last.data,
-										),
-										GridItem(
-											heading: "EC",
-											value: system.ec.last.data,
-										),
-									]
-								)
-							],
-						),
+						child: DataTable(system)
 					),
 					Card(
 						margin: EdgeInsets.all(10),
 						child: Graph(
 							title: "Test",
-								data: testgraph
+								data: testgraph,
 						)
 					),
 					ElevatedButton(
