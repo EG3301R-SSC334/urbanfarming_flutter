@@ -51,8 +51,17 @@ class Graph extends StatelessWidget {
 }
 
 class DataPoint {
-	final int value;
-	final DateTime time;
+	final double value;
+	late final DateTime time;
 
-	DataPoint(this.value, this.time);
+	DataPoint(this.value, double unixTime) {
+		this.time = DateTime.fromMillisecondsSinceEpoch(unixTime.toInt() * 1000);
+	}
+
+	Map<String, dynamic> toJson() {
+		return {
+			"value": value,
+			"time": time
+		};
+	}
 }

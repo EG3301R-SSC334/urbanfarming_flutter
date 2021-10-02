@@ -21,6 +21,7 @@ import 'package:http/http.dart' as http;
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'auth.dart';
 import 'graphs.dart';
 
 typedef ServerCB = Function(dynamic ret);
@@ -44,19 +45,19 @@ class System {
 		);
 
 		systemJson["humidity"].forEach((item) {
-			retSystem.humidity.add(DataPoint(double.tryParse(item["value"]) ?? 0.0, item["time"]));
+			retSystem.humidity.add(DataPoint(double.parse(item["value"]), item["time"]));
 		});
 
 		systemJson["temperature"].forEach((item) {
-			retSystem.temperature.add(DataPoint(double.tryParse(item["value"]) ?? 0.0, item["time"]));
+			retSystem.temperature.add(DataPoint(double.parse(item["value"]), item["time"]));
 		});
 
 		systemJson["pH"].forEach((item) {
-			retSystem.ph.add(DataPoint(double.tryParse(item["value"]) ?? 0.0, item["time"]));
+			retSystem.ph.add(DataPoint(double.parse(item["value"]), item["time"]));
 		});
 
 		systemJson["EC"].forEach((item) {
-			retSystem.ec.add(DataPoint(double.tryParse(item["value"]) ?? 0.0, item["time"]));
+			retSystem.ec.add(DataPoint(double.parse(item["value"]), item["time"]));
 		});
 
 		return retSystem;
@@ -111,106 +112,19 @@ class Server {
 			_prefs = prefs;
 			bearer = prefs.getString("bearer");
 			userID = prefs.getString("user_id");
-
-			try {
-				loggedIn = prefs.getBool("logged_in") ?? false;
-				print("\nLogged In Status: $loggedIn");
-			} catch (e) {
-				print("ERROR\n	shared preferences: $e");
-				loggedIn = false;
-			} 
-			authComplete = true;
 		});
 
-		_googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount? account) {
-			_currentuser = account;
-			_prefs?.setBool("logged_in", true);
-			loggedIn = true;
-			print("Setting logged_in to true");
-
-			_callAuthCBs(User.fromGoogleAccount(account!));
-		});
-
-		_googleSignIn.signInSilently();
-		print('_currentUser: $_currentuser');
-		print('Auth init complete');
-
+		// _auth.addCB(authCB);
 	}
+
 	// Continue with class
-	// google auth code
-		GoogleSignIn _googleSignIn = GoogleSignIn(
-		clientId: "",
-		scopes: [
-			'https://www.googleapis.com/auth/userinfo.email'
-		]
-	);
 
-	GoogleSignInAccount? _currentuser;
-	SharedPreferences? _prefs;
-
-	bool authComplete = false;
-	bool loggedIn = false;
-
-	List<Function> _authCBs = [];
-	void addAuthCB(Function cb) => _authCBs.add(cb);
-	void removeAuthCB(Function cb) => _authCBs.remove(cb);
-
-	void _callAuthCBs(dynamic retVal) => _authCBs.forEach((cb) => cb(retVal));
-
-	Future<void> signIn() async {
-		GoogleSignInAccount? gaccount;
-		GoogleSignInAuthentication? gauth;
-
-		try {
-			gaccount = await _googleSignIn.signIn();
-		} catch (error) {
-			print('Error experienced during log ing: $error');
-		}
-
-		if (gaccount != null)
-			gauth = await gaccount.authentication;
-		else {
-			print("error in logging in");
-			return;
-		}
-
-		Map<String, String> body = {
-			"username": gaccount.displayName ?? "",
-			"email": gaccount.email,
-			"id_token": gauth.idToken ?? "",
-			"access_token": gauth.accessToken ?? ""
-		};
-
-		await sauth(body);
-	}
-
-	Future<void> signOut() async {
-		await _googleSignIn.disconnect();
-		_prefs?.setBool("logged_in", false);
-	}
-
-	bool isSignedIn() {
-		for (int i =  0; i < 20; i++) {
-			if (authComplete)
-				break;
-			Future.delayed(Duration(microseconds: 3));
-		}
-
-		return loggedIn;
-	}
-
-	User? getUser() {
-		if (_currentuser == null)
-			return null;
-		else
-			return User.fromGoogleAccount(_currentuser!);
-	}
-
-	// server code
 	final String _host = 'urban-farming-demo.herokuapp.com';
+	SharedPreferences? _prefs;
 	String? bearer;
 	String? userID;
 
+	Auth _auth = Auth();
 	User? _user;
 
 	bool _verbose = true;
@@ -284,7 +198,7 @@ class Server {
 			return jsonDecode(response.body);
 	}
 
-	Future<void> sauth(Map<String, String> body) async {
+	Future<void> auth(Map<String, String> body) async {
 		dynamic respJson;
 		try {
 			respJson = await _request(
@@ -310,15 +224,12 @@ class Server {
 		List<System> retList = [];
 		dynamic respJson = await _request(
 			_Requests.get,
-			"users/$userID"
+			"/systems"
 		);
 
-		// respJson["system_ids"].forEach((sys_id) async {
-		// 	retList.add(await getSystem(sys_id));
-		// });
-
-		retList.add(await getSystem(respJson["systems"]));
-		print(retList);
+		respJson["system_ids"].forEach((sys_id) async {
+			retList.add(await getSystem(sys_id));
+		});
 
 		// _callCBs(retList);
 		return retList;

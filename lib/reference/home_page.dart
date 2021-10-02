@@ -17,7 +17,7 @@
 
 import 'package:flutter/material.dart' hide DataTable;
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:charts_flutter/flutter.dart' hide TextStyle;
+// import 'package:charts_flutter/flutter.dart' hide TextStyle;
 
 import 'login_page.dart';
 import 'user_page.dart';
@@ -27,63 +27,26 @@ import 'data_table.dart';
 
 import 'server.dart';
 import 'graphs.dart';
-import 'auth.dart';
+// import 'auth.dart';
 
 class _HomePageState extends State {
-	Auth auth = Auth();
-	List<Plant> plants = [];
-	Server server = Server();
-	// System? system;
-	System system = System(
-		name: "name",
-		owner: "owner",
-		plantType: "plant"
-	);
+	// Auth _auth = Auth();
+	// List<Plant> plants = [];
+	Server _server = Server();
+	// System system = System.sample();
+	System system = System(plantType: "test");
 	
 	@override
 	void initState() {
 		super.initState();
-		auth.addCB(authCB);
+		_server.addAuthCB(authCB);
 		WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {postBuild();});
-
-		system.humidity = [
-			DataPoint(1, DateTime(2021, 09, 10)),
-			DataPoint(2, DateTime(2021, 09, 11)),
-			DataPoint(3, DateTime(2021, 09, 12)),
-			DataPoint(4, DateTime(2021, 09, 13)),
-			DataPoint(5, DateTime(2021, 09, 14)),
-			DataPoint(6, DateTime(2021, 09, 15)),
-		];
-		system.temperature = [
-			DataPoint(1, DateTime(2021, 09, 10)),
-			DataPoint(2, DateTime(2021, 09, 11)),
-			DataPoint(3, DateTime(2021, 09, 12)),
-			DataPoint(4, DateTime(2021, 09, 13)),
-			DataPoint(5, DateTime(2021, 09, 14)),
-			DataPoint(6, DateTime(2021, 09, 15)),
-		];
-		system.ph = [
-			DataPoint(1, DateTime(2021, 09, 10)),
-			DataPoint(2, DateTime(2021, 09, 11)),
-			DataPoint(3, DateTime(2021, 09, 12)),
-			DataPoint(4, DateTime(2021, 09, 13)),
-			DataPoint(5, DateTime(2021, 09, 14)),
-			DataPoint(6, DateTime(2021, 09, 15)),
-		];
-		system.ec = [
-			DataPoint(1, DateTime(2021, 09, 10)),
-			DataPoint(2, DateTime(2021, 09, 11)),
-			DataPoint(3, DateTime(2021, 09, 12)),
-			DataPoint(4, DateTime(2021, 09, 13)),
-			DataPoint(5, DateTime(2021, 09, 14)),
-			DataPoint(6, DateTime(2021, 09, 15)),
-		];
 	}
 
-	void _cb(List<Plant> newList) {
-		plants = newList;
-		setState(() {print("SET STATE");});
-	}
+	// void _cb(List<Plant> newList) {
+	// 	plants = newList;
+	// 	setState(() {print("SET STATE");});
+	// }
 
 	void _systemCB(System newSystem) {
 		system = newSystem;
@@ -91,35 +54,34 @@ class _HomePageState extends State {
 	}
 
 	void postBuild() {
-		if (!auth.isSignedIn()) {
+		if (!_server.isSignedIn()) {
 			Navigator.push(context, MaterialPageRoute(builder: (context) => LogInPage()));
 		}
 	}
 
 	void authCB() {
 		setState(() {
-		  print(auth.getUser().toString());
+		  print(_server.getUser().toString());
 		});
 	}
 
 	@override
 	Widget build(BuildContext context) {
-		server.addCB(_cb);
-		server.addSystemCB(_systemCB);
+		// server.addCB(_cb);
+		_server.addCB(_systemCB);
 
-		GoogleSignInAccount? user = auth.getUser();
+		// GoogleSignInAccount? user = auth.getUser();
+		User _user = _server.getUser()!;
 
 		return Scaffold(
 			appBar: AppBar(
 				title: Text("Urban Farming"),
 				actions: [
 					IconButton(
-						// icon: const Icon(Icons.account_circle_outlined),
-						// icon: (user != null) ? Image.network(user?.photoUrl ?? "http://cdn.onlinewebfonts.com/svg/img_504768.png") : const Icon(Icons.account_circle_outlined),
 						icon: CircleAvatar(
-							backgroundImage: NetworkImage(auth.getPhoto()),
+							backgroundImage: NetworkImage(_user.photoURL),
 							backgroundColor: Colors.green,
-							child: Text(auth.getInitials()),
+							child: Text(_user.initials),
 						),
 						onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => UserPage()))
 					)
@@ -140,16 +102,16 @@ class _HomePageState extends State {
 					),
 					ElevatedButton(
 						child: Text("Sign in status"),
-						onPressed: () => auth.isSignedIn(),
+						onPressed: () => _server.isSignedIn(),
 					),
-					ElevatedButton(
-						child: Text("trial"),
-						onPressed: () async {
-							GoogleSignInAuthentication? authen = await user?.authentication;
-							print("AUTH TOKEN: ${authen?.idToken}");
-							print(user?.email);
-						},
-					)
+					// ElevatedButton(
+					// 	child: Text("trial"),
+					// 	onPressed: () async {
+					// 		GoogleSignInAuthentication? authen = await _auth.authentication;
+					// 		print("AUTH TOKEN: ${authen?.idToken}");
+					// 		print(_user.email);
+					// 	},
+					// )
 				],
 			),
 		);

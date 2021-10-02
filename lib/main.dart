@@ -15,16 +15,135 @@
 // You should have received a copy of the GNU General Public License
 // along with urbanfarming_flutter.  If not, see <https://www.gnu.org/licenses/>.
 
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide DataTable;
 
-import 'home_page.dart';
+import 'user_page.dart';
+import 'login_page.dart';
+
+
+import 'data_table.dart';
+import 'graphs.dart';
+import 'local_files.dart';
+import 'server.dart';
+
+class _SummaryPageState extends State {
+	System? _system;
+	Server _server = Server();
+
+	void initState() {
+		super.initState();
+		WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {_postBuild();});
+	}
+
+	void _postBuild() {
+		if (!_server.isSignedIn()) 
+			Navigator.push(context, MaterialPageRoute(builder: (context) => LogInPage())).then((value) {
+				_server.getSystems().then((system) {
+					_system = system[0];
+					setState(() {
+						print("SETTING STATE");
+					});
+				});
+			});
+	}
+
+	@override
+	Widget build(BuildContext context) {
+		return ListView(
+			children: [
+				Card(
+					child: (_system != null) ? DataTable(_system!) : Container(),
+				),
+				Graph(
+					title: "Temperature",
+					data: _system?.temperature ?? [],
+				), 
+				Graph(
+					title: "humidity",
+					data: _system?.humidity ?? [],
+				), 
+				Graph(
+					title: "pH",
+					data: _system?.ph ?? [],
+				), 
+				Graph(
+					title: "EC",
+					data: _system?.ec ?? [],
+				), 
+				ElevatedButton(
+					child: Text("GET SYSTEM"),
+					onPressed: () {
+						_server.getSystems().then((system) {
+							_system = system[0];
+							setState(() {});
+						});
+					},
+				),
+				ElevatedButton(
+					child: Text("trial"),
+					onPressed: () {},
+				)
+			],
+		);
+	}
+}
+
+class SummaryPage extends StatefulWidget {
+	@override
+	_SummaryPageState createState() => _SummaryPageState();
+}
+
+class _MainDrawerState extends State {
+	@override
+	Widget build(BuildContext context) => Drawer(
+		child: ListView(
+			children: [
+				DrawerHeader(
+					child: Container(
+						child: Text("Header"),
+					),
+				),
+				ListTile(
+					title: Text("1"),
+				),
+				ListTile(
+					title: Text("2"),
+				),
+				ListTile(
+					title: Text("3"),
+				),
+				ListTile(
+					title: Text("User"),
+					onTap: () {
+						Navigator.pop(context);
+						Navigator.push(context, MaterialPageRoute(builder: (context) => UserPage()));
+					}
+				)
+			],
+		),
+	);
+}
+
+class MainDrawer extends StatefulWidget {
+	@override
+	_MainDrawerState createState() => _MainDrawerState();
+}
 
 class UrbanFarmingApp extends StatelessWidget {
 	@override
 	Widget build(BuildContext context) => MaterialApp(
 		title: "Urban Farming",
-		home: HomePage()
+		home: Scaffold(
+			appBar: AppBar(
+				title: Text("Urban Farming"),
+			),
+			body: SummaryPage(),
+			drawer: MainDrawer()
+		)
 	);
 }
 
-void main() => runApp(UrbanFarmingApp());
+void main() {
+	WidgetsFlutterBinding.ensureInitialized();
+	runApp(UrbanFarmingApp());
+} 

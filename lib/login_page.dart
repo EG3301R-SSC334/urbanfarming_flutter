@@ -17,14 +17,11 @@
 
 import 'package:flutter/material.dart';
 
-import 'home_page.dart';
-
-import 'auth.dart';
-
-Auth _auth = Auth();
+import 'server.dart';
 
 class LogInPageState extends State {
-	void authCB() {
+	Server _server = Server();
+	void authCB(dynamic ret) {
 		print("LOGIN Page Auth CB Called");
 		setState(() {
 			Navigator.pop(context);
@@ -35,13 +32,11 @@ class LogInPageState extends State {
 	@override
 	void initState() {
 		super.initState();
-		_auth.addCB(authCB);
+		_server.addAuthCB(authCB);
 	}
 
 	@override
 	Widget build(BuildContext context) {
-		// _auth.addCB(authCB);
-
 		return WillPopScope(
 			onWillPop: () async => false,
 			child: Scaffold(
@@ -52,7 +47,7 @@ class LogInPageState extends State {
 				body: Center(
 					child: ElevatedButton(
 						child: Text("Log in with Google"),
-						onPressed: () => _auth.signIn(),
+						onPressed: () => _server.signIn(),
 					)
 				)
 			)
@@ -61,7 +56,7 @@ class LogInPageState extends State {
 
 	@override
 	void dispose() {
-		_auth.removeCB(authCB);
+		_server.removeAuthCB(authCB);
 		super.dispose();
 	}
 }

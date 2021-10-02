@@ -19,16 +19,17 @@ import 'package:flutter/material.dart';
 
 import 'login_page.dart';
 
-import 'auth.dart';
+import 'server.dart';
 
 class UserPage extends StatelessWidget {
 	@override
 	Widget build(BuildContext context) {
-		Auth _user = Auth();
+		Server _server = Server();
+		User _user = _server.getUser()!;
 
 		return Scaffold(
 			appBar: AppBar(
-				title: Text(_user.getName()),
+				title: Text(_user.name),
 			),
 			body: Center(
 			  child: DefaultTextStyle(
@@ -43,21 +44,18 @@ class UserPage extends StatelessWidget {
 								child: Column(
 									children: [
 										CircleAvatar(
-											backgroundImage: NetworkImage(_user.getPhoto()),
+											backgroundImage: NetworkImage(_user.photoURL),
 											backgroundColor: Colors.green,
 											radius: 100,
 											child: Text(
-												_user.getInitials(),
+												_user.initials,
 												style: TextStyle(
 													fontSize: 100
 												),
 											),
 										),
-										// SizedBox(height: 10),
-										Text(_user.getName()),
-										// SizedBox(height: 10),
-										Text(_user.getEmail()),
-										// SizedBox(height: 10),
+										Text(_user.name),
+										Text(_user.email),
 									],
 								)
 							),
@@ -66,7 +64,7 @@ class UserPage extends StatelessWidget {
 								child: ElevatedButton(
 									child: Text("Log out"),
 									onPressed: () {
-									_user.signOut().then((_) {
+									_server.signOut().then((_) {
 										Navigator.push(context, MaterialPageRoute(builder: (context) => LogInPage()));
 									});
 								},

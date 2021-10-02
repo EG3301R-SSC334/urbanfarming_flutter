@@ -31,7 +31,7 @@ class Auth {
 
 	// Continue with the class itself
 	GoogleSignIn _googleSignIn = GoogleSignIn(
-		clientId: "",
+		clientId: "46868439888-v405ntt411j634238ih9qptopb9svdjf.apps.googleusercontent.com",
 		scopes: [
 			'https://www.googleapis.com/auth/userinfo.email'
 		]
@@ -49,7 +49,7 @@ class Auth {
 		SharedPreferences.getInstance().then((prefs) {
 			_prefs = prefs;
 			try {
-				loggedIn = _prefs?.getBool("logged_in") ?? false;
+				loggedIn = prefs.getBool("logged_in") ?? false;
 				print("\nLogged In Status: $loggedIn");
 			} catch (error) {
 				print(error);
@@ -62,17 +62,20 @@ class Auth {
 		_googleSignIn.onCurrentUserChanged.listen((GoogleSignInAccount? account) {
 			_currentUser = account;
 			_prefs?.setBool("logged_in", true);
+			loggedIn = true;
+			print("setting logged in to true");
 
-			_cbs.forEach((element) {
-				element();
+			_cbs.forEach((cb) {
+				cb();
 			});
 		});
 
 		_googleSignIn.signInSilently();
-		// print("_currentUser $_currentUser");
+		print("_currentUser $_currentUser");
 
 		print("Auth init complete");
 	}
+
 
 	void addCB(Function cb) {
 		_cbs.add(cb);
@@ -136,12 +139,20 @@ class Auth {
 			"access_token": gauth?.accessToken ?? ""
 		};
 
-		Map<String, String> authResp = await server.auth(body);
+		Map<String, dynamic> authResp = await server.auth(body);
 		print("authResp: $authResp");
+		_prefs?.setString("bearer", authResp["bearerToken"] ?? "");
+		_prefs?.setString("user_id", authResp["user"]["_id"]);
+		print('BEARER: ${authResp["bearerToken"]}');
+		print('user id: ${authResp["user"]["_id"]}');
 
 	}
 
-
+	List<String> getBearer() {
+		print("bearer new");
+		print(_prefs?.getString("bearer") ?? "NO BEARER");
+		return [_prefs?.getString("bearer") ?? "", _prefs?.getString("user_id") ?? ""];
+	}
 
 	Future<void> signOut() async {
 		await _googleSignIn.disconnect();
