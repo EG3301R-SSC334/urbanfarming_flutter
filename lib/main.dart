@@ -15,16 +15,15 @@
 // You should have received a copy of the GNU General Public License
 // along with urbanfarming_flutter.  If not, see <https://www.gnu.org/licenses/>.
 
-import 'package:flutter/material.dart' hide DataTable;
+import 'package:flutter/material.dart';
 
 import 'user_page.dart';
 import 'login_page.dart';
 
 
 import 'summary_table.dart';
-import 'graphs.dart';
-import 'local_files.dart';
 import 'server.dart';
+import 'system_page.dart';
 
 class _SummaryPageState extends State {
 	System? _system;
@@ -52,24 +51,19 @@ class _SummaryPageState extends State {
 		return ListView(
 			children: [
 				Card(
-					child: (_system != null) ? SummaryTable(_system!) : Container(),
+					child: (_system != null) ? Column(
+						children: [
+							Text(
+								_system!.name ?? "System",
+								style: TextStyle(
+									fontSize: 20,
+									fontWeight: FontWeight.bold
+								),
+							),
+							SummaryTable(_system!) 
+						]
+					) : Container(),
 				),
-				Graph(
-					title: "Temperature",
-					data: _system?.temperature ?? [],
-				), 
-				Graph(
-					title: "humidity",
-					data: _system?.humidity ?? [],
-				), 
-				Graph(
-					title: "pH",
-					data: _system?.ph ?? [],
-				), 
-				Graph(
-					title: "EC",
-					data: _system?.ec ?? [],
-				), 
 				ElevatedButton(
 					child: Text("GET SYSTEM"),
 					onPressed: () {
@@ -81,7 +75,9 @@ class _SummaryPageState extends State {
 				),
 				ElevatedButton(
 					child: Text("trial"),
-					onPressed: () {},
+					onPressed: () {
+						print(_system?.name);
+					},
 				)
 			],
 		);
@@ -94,49 +90,55 @@ class SummaryPage extends StatefulWidget {
 }
 
 class _MainDrawerState extends State {
-	LocalFiles files = LocalFiles();
-
-	Future<void> getSystems() async {
-		Map<String, dynamic> systemsMap = await files.readJson(LocalFiles.systemsFile);
-		systemsMap["systems"].forEach((item) {
-			print(item);
-		});
-	}
-
+	Server _server = Server();
+	List<System> _systems = [];
 
 	@override
 	void initState() {
 		super.initState();
-		getSystems();
+		// getSystems();
+		_server.addCB(Server.system, _systemsCB);
+		_systems = _server.systems;
+		print(_systems);
+	}
+
+	void _systemsCB(List<System> retList) {
+		print("DRAWER SYSTEM CB CALLED");
+		_systems = retList;
+		setState(() {});
 	}
 
 	@override
 	Widget build(BuildContext context) => Drawer(
-		child: ListView(
-			children: [
-				DrawerHeader(
-					child: Container(
-						child: Text("Header"),
-					),
-				),
-				ListTile(
-					title: Text("1"),
-				),
-				ListTile(
-					title: Text("2"),
-				),
-				ListTile(
-					title: Text("3"),
-				),
-				ListTile(
-					title: Text("User"),
-					onTap: () {
-						Navigator.pop(context);
-						Navigator.push(context, MaterialPageRoute(builder: (context) => UserPage()));
-					}
-				)
-			],
-		),
+		child: ListView.builder(
+			itemCount: _systems.length + 2,
+			itemBuilder: (context, index) {
+				print(index);
+				if (index == 0) {
+					return DrawerHeader(
+						child: Container(
+							child: Text("Header"),
+						),
+					);
+				} else if (index == _systems.length + 1) {
+					return ListTile(
+						title: Text("User"),
+						onTap: () {
+							Navigator.pop(context);
+							Navigator.push(context, MaterialPageRoute(builder: (context) => UserPage()));
+						},
+					);
+				} else {
+					return ListTile(
+						title: Text(_systems[index - 1].name ?? "System ${index - 1}"),
+						onTap: () {
+							Navigator.pop(context);
+							Navigator.push(context, MaterialPageRoute(builder: (context) => SystemPage(_systems[index])));
+						}
+					);
+				}
+			}
+		)
 	);
 }
 
