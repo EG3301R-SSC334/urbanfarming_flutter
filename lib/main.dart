@@ -21,7 +21,7 @@ import 'user_page.dart';
 import 'login_page.dart';
 
 
-import 'data_table.dart';
+import 'summary_table.dart';
 import 'graphs.dart';
 import 'local_files.dart';
 import 'server.dart';
@@ -52,7 +52,7 @@ class _SummaryPageState extends State {
 		return ListView(
 			children: [
 				Card(
-					child: (_system != null) ? DataTable(_system!) : Container(),
+					child: (_system != null) ? SummaryTable(_system!) : Container(),
 				),
 				Graph(
 					title: "Temperature",
@@ -94,6 +94,22 @@ class SummaryPage extends StatefulWidget {
 }
 
 class _MainDrawerState extends State {
+	LocalFiles files = LocalFiles();
+
+	Future<void> getSystems() async {
+		Map<String, dynamic> systemsMap = await files.readJson(LocalFiles.systemsFile);
+		systemsMap["systems"].forEach((item) {
+			print(item);
+		});
+	}
+
+
+	@override
+	void initState() {
+		super.initState();
+		getSystems();
+	}
+
 	@override
 	Widget build(BuildContext context) => Drawer(
 		child: ListView(
