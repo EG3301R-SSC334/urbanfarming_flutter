@@ -32,7 +32,7 @@ class _TableItem extends StatelessWidget {
 			mainAxisAlignment: MainAxisAlignment.center,
 			children: [
 				Text(heading, style: TextStyle(fontWeight: FontWeight.bold)),
-				Text(value.toString())
+				Text(value.toStringAsPrecision(3))
 			],
 		)
 	);
