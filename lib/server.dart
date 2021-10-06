@@ -128,8 +128,10 @@ class Server {
 			loggedIn = true;
 			print("Setting logged_in to true");
 
-			_callAuthCBs(User.fromGoogleAccount(account!));
+			_callCBs(auth, User.fromGoogleAccount(account!));
 		});
+
+		addCB(auth, authCB);
 
 		_googleSignIn.signInSilently();
 		print('_currentUser: $_currentuser');
@@ -137,8 +139,27 @@ class Server {
 
 	}
 	// Continue with class
+
+	// common 
+	static const auth = 0x01;
+	static const system = 0x02;
+
+	List<Function>? _getList(int type) {
+		List<Function>? selectedList;
+		switch (type) {
+			case auth: 		selectedList = _authCBs;		break;
+			case system: 	selectedList = _systemCBs; 	break;
+		}
+
+		return selectedList;
+	}
+
+	void addCB(int type, Function cb) => _getList(type)?.add(cb);
+	void removeCB(int type, Function cb) => _getList(type)?.remove(cb);
+	void _callCBs(int type, dynamic ret) => _getList(type)?.forEach((cb) =>cb(ret));
+
 	// google auth code
-		GoogleSignIn _googleSignIn = GoogleSignIn(
+	GoogleSignIn _googleSignIn = GoogleSignIn(
 		clientId: "",
 		scopes: [
 			'https://www.googleapis.com/auth/userinfo.email'
@@ -152,10 +173,6 @@ class Server {
 	bool loggedIn = false;
 
 	List<Function> _authCBs = [];
-	void addAuthCB(Function cb) => _authCBs.add(cb);
-	void removeAuthCB(Function cb) => _authCBs.remove(cb);
-
-	void _callAuthCBs(dynamic retVal) => _authCBs.forEach((cb) => cb(retVal));
 
 	Future<void> signIn() async {
 		GoogleSignInAccount? gaccount;
@@ -216,11 +233,6 @@ class Server {
 	bool _verbose = true;
 
 	List<Function> _systemCBs = [];
-
-	void addCB(Function cb) => _systemCBs.add(cb);
-	void removeCB(Function cb) => _systemCBs.remove(cb);
-
-	void _callCBs(dynamic retVal) => _systemCBs.forEach((cb) => cb(retVal));
 
 	void authCB(User user) {
 		_user = user;
@@ -306,6 +318,10 @@ class Server {
 		}
 	}
 
+	List<System> get systems => _user?.systems ?? [];
+
+	dynamic get trial => _user;
+
 	Future<List<System>> getSystems() async {
 		List<System> retList = [];
 		dynamic respJson = await _request(
@@ -320,7 +336,8 @@ class Server {
 		retList.add(await getSystem(respJson["systems"]));
 		print(retList);
 
-		// _callCBs(retList);
+		_callCBs(system, retList);
+		_user?.systems = retList;
 		return retList;
 	}
 
@@ -330,7 +347,7 @@ class Server {
 			"systems/$sysID"
 		);
 
-		_callCBs(System.fromServer(respJson));
+		// _callCBs(system, System.fromServer(respJson));
 		return System.fromServer(respJson);
 	}
 
