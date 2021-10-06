@@ -32,7 +32,7 @@ class LogInPageState extends State {
 	@override
 	void initState() {
 		super.initState();
-		_server.addAuthCB(authCB);
+		_server.addCB(Server.auth, authCB);
 	}
 
 	@override
@@ -56,7 +56,7 @@ class LogInPageState extends State {
 
 	@override
 	void dispose() {
-		_server.removeAuthCB(authCB);
+		_server.removeCB(Server.auth, authCB);
 		super.dispose();
 	}
 }

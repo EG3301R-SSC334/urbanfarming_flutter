@@ -20,12 +20,15 @@ import 'package:flutter/material.dart';
 import 'user_page.dart';
 import 'login_page.dart';
 import 'summary_table.dart';
+// import 'local_files.dart';
 import 'server.dart';
 import 'system_page.dart';
+import 'bt_page.dart';
 
 class _SummaryPageState extends State {
 	System? _system;
 	Server _server = Server();
+	// LocalFiles files = LocalFiles();
 
 	void initState() {
 		super.initState();
@@ -43,6 +46,16 @@ class _SummaryPageState extends State {
 				});
 			});
 	}
+
+	// void _testFunc() async {
+	// 	print(_system.toString());
+	// 	// print(_system.toJson());
+	// 	await files.writeJson(LocalFiles.testFile, {"test": _system});
+	// 	print("Written file");
+	// 	Map<String, dynamic> readStr = await files.readJson(LocalFiles.testFile);
+	// 	print(readStr["test"]);
+	// 	print("Finished");
+	// }
 
 	@override
 	Widget build(BuildContext context) {
@@ -83,7 +96,7 @@ class _SummaryPageState extends State {
 				ElevatedButton(
 					child: Text("trial"),
 					onPressed: () {
-
+						Navigator.push(context, MaterialPageRoute(builder: (context) => BTPage()));
 					},
 				),
 			],
@@ -97,6 +110,16 @@ class SummaryPage extends StatefulWidget {
 }
 
 class _MainDrawerState extends State {
+	// LocalFiles files = LocalFiles();
+	// List<System> systems = 
+
+	// Future<void> getSystems() async {
+	// 	Map<String, dynamic> systemsMap = await files.readJson(LocalFiles.systemsFile);
+	// 	systemsMap["systems"].forEach((item) {
+	// 		print(item);
+	// 	});
+	// }
+
 	Server _server = Server();
 	List<System> _systems = [];
 
