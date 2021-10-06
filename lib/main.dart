@@ -19,8 +19,6 @@ import 'package:flutter/material.dart';
 
 import 'user_page.dart';
 import 'login_page.dart';
-
-
 import 'summary_table.dart';
 import 'server.dart';
 import 'system_page.dart';
@@ -62,7 +60,16 @@ class _SummaryPageState extends State {
 							),
 							SummaryTable(_system!) 
 						]
-					) : Container(),
+					) : Container(
+						child: Center(
+							child: SizedBox(
+								child: CircularProgressIndicator(),
+								height: 50,
+								width: 50,
+							)
+						),
+						height: 170
+					)
 				),
 				ElevatedButton(
 					child: Text("GET SYSTEM"),
@@ -76,9 +83,9 @@ class _SummaryPageState extends State {
 				ElevatedButton(
 					child: Text("trial"),
 					onPressed: () {
-						print(_system?.name);
+
 					},
-				)
+				),
 			],
 		);
 	}
@@ -133,7 +140,7 @@ class _MainDrawerState extends State {
 						title: Text(_systems[index - 1].name ?? "System ${index - 1}"),
 						onTap: () {
 							Navigator.pop(context);
-							Navigator.push(context, MaterialPageRoute(builder: (context) => SystemPage(_systems[index])));
+							Navigator.push(context, MaterialPageRoute(builder: (context) => SystemPage(_systems[index - 1])));
 						}
 					);
 				}
