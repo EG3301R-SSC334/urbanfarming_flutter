@@ -26,7 +26,7 @@ class BT {
 	Map<BluetoothService, List<BluetoothCharacteristic>> _characteristics = {};
 
 	List<String> _impServiceIDs = ["feed"];
-	List<String> _impCharacteristicIDs = ["fed0"];
+	List<String> _impCharacteristicIDs = ["fed0", "fed1"];
 
 	void scan() {
 		_blue.startScan(
@@ -58,6 +58,27 @@ class BT {
 	String _get16bitID(Guid fullID) => fullID.toString().substring(4,8);
 
 	bool _isImpID(Guid fullID, List<dynamic> filter) => filter.contains(_get16bitID(fullID));
+
+	bool isPlantStation(ScanResult scanResult) {
+		for (String uuid in scanResult.advertisementData.serviceUuids) {
+			if (_impServiceIDs.contains(uuid.substring(4,8)) && scanResult.advertisementData.localName == "Plantstation")
+				return true;
+		}
+		return false;
+	}
+
+	Stream<List<ScanResult>> scanForPlantStation() async* {
+		_blue.startScan(timeout: Duration(seconds: 4));
+
+		print("Scanning for PlantStations");
+		await for (List<ScanResult> results in _blue.scanResults) {
+			for (ScanResult result in results) {
+				if (isPlantStation(result)) {
+					yield [result];
+				}
+			}
+		}
+	}
 
 	Future<List<BluetoothService>> connect(BluetoothDevice device) async {
 		await device.connect();
